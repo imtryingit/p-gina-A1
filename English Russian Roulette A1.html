@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>English Russian Roulette A1</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Work+Sans:wght@400;600&display=swap">
+<style>
+:root{--bg:#E4EEE7;--ink:#10291F;--card:#F7FBF8;--line:#B7CCBE;--red:#B3162B;--brass:#8A6410;--soft:#4B6356;--on-red:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0D3024;--ink:#F1EFE4;--card:#13402F;--line:#2C5E49;--red:#E5384F;--brass:#E3B450;--soft:#A9C7B8}}
+:root[data-theme="dark"]{--bg:#0D3024;--ink:#F1EFE4;--card:#13402F;--line:#2C5E49;--red:#E5384F;--brass:#E3B450;--soft:#A9C7B8}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 18px/1.5 "Work Sans",system-ui,sans-serif}
+main{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+h1{font:400 clamp(34px,8vw,64px)/1 "Alfa Slab One",Georgia,serif;margin:8px 0 6px;color:var(--red)}
+h2{font:400 26px/1.1 "Alfa Slab One",Georgia,serif;margin:0 0 4px}
+.sub{color:var(--soft);margin:0 0 20px}
+.stage{background:var(--card);border:2px solid var(--ink);border-radius:20px;padding:20px;margin-bottom:34px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{font:600 14px "Work Sans",sans-serif;border:1.5px solid var(--ink);background:transparent;color:var(--ink);border-radius:99px;padding:6px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+button:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+.cat{color:var(--brass);font-weight:600;min-height:1.5em}
+.prompt{font:400 clamp(28px,6.5vw,46px)/1.2 "Alfa Slab One",Georgia,serif;min-height:3.4em;margin:6px 0 14px}
+.bar{height:14px;border-radius:9px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:100%;background:var(--brass);transform-origin:left}
+.bar.low i{background:var(--red)}
+.time{font:400 28px "Alfa Slab One",serif;margin:8px 0 0;min-height:1.2em}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.btn{font:600 17px "Work Sans",sans-serif;border:2px solid var(--ink);border-radius:12px;padding:12px 18px;background:var(--card);color:var(--ink);cursor:pointer}
+.btn.go{background:var(--red);border-color:var(--red);color:var(--on-red)}
+.btn[disabled]{opacity:.4;cursor:default}
+.ans{margin-top:12px;font-weight:600;color:var(--brass);min-height:1.5em}
+.deck{margin-bottom:34px}
+ul{list-style:none;padding:0;margin:12px 0 0;display:grid;gap:8px}
+li{background:var(--card);border-left:5px solid var(--brass);border-radius:6px;padding:10px 14px}
+.tr{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.tr li{display:flex;justify-content:space-between;gap:10px}
+.tr li span:last-child{color:var(--soft);text-align:right}
+.forf li{border-left-color:var(--red)}
+.rules{background:var(--card);border:1.5px dashed var(--line);border-radius:12px;padding:6px 18px;margin-bottom:28px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<h1>English Russian Roulette</h1>
+<p class="sub">Nivel A1 · Un estudiante a la vez · 3 vidas</p>
+
+<div class="rules">
+<p><b>Reglas:</b> el profesor lanza un reto y el estudiante responde sin quedarse en blanco. Si no responde o responde mal, pierde una vida. Con la tercera, cumple un castigo. En los retos de palabras, el profesor dice la palabra en inglés y el estudiante la dice en español.</p>
+</div>
+
+<section class="stage" aria-live="polite">
+<div class="chips" id="chips" role="group" aria-label="Categoría"></div>
+<div class="chips" id="flu-opt" role="group" aria-label="Tiempo en Fluency"><span style="align-self:center;color:var(--soft)">Tiempo en Fluency:</span><button class="chip" data-s="20" aria-pressed="false">0:20</button><button class="chip" data-s="30" aria-pressed="true">0:30</button></div>
+<div class="cat" id="cat">Elige una categoría y pulsa Spin.</div>
+<div class="prompt" id="prompt">Ready?</div>
+<div class="bar" id="bar"><i id="fill"></i></div>
+<div class="time" id="time"></div>
+<div class="ans" id="ans"></div>
+<div class="btns">
+<button class="btn go" id="spin">Spin</button>
+<button class="btn" id="reveal" disabled>Mostrar respuesta</button>
+<button class="btn" id="dead">Forfeit</button>
+</div>
+</section>
+
+<section class="deck"><h2>1. Vocabulary</h2><p class="sub">Retos de palabras (10 segundos).</p><ul id="L-voc"></ul>
+<p class="sub" style="margin-top:20px">Palabras: el profesor dice la palabra en inglés y el estudiante la dice en español (7 segundos).</p><ul class="tr" id="L-tra"></ul></section>
+<section class="deck"><h2>2. Fluency</h2><p class="sub">20 o 30 segundos.</p><ul id="L-flu"></ul></section>
+<section class="deck"><h2>3. Grammar</h2><p class="sub">12 segundos.</p><ul id="L-gra"></ul></section>
+<section class="deck"><h2>4. Word Bomb (A2)</h2><p class="sub">Solo palabras: el profesor dice la palabra en español y el estudiante la dice en inglés (7 segundos). Nivel A2, con algunos “falsos amigos”.</p><ul class="tr" id="L-wb"></ul></section>
+<section class="deck"><h2>5. Forfeits</h2><ul class="forf" id="L-for"></ul></section>
+</main>
+
+<script>
+var D={
+voc:["Name <b>3 colors</b>.","Name <b>3 animals</b>.","Name <b>3 fruits</b>.","Name <b>3 things</b> in a <b>kitchen</b>.","Say <b>3 family members</b>.","Name <b>3 jobs</b>.","Name <b>3 clothes</b>.","Say the <b>days</b> from <b>Monday to Friday</b>.","Name <b>3 things</b> in your <b>bag</b>.","Say the <b>numbers</b> from <b>10 to 20</b>."],
+tra:[["house","casa"],["brother","hermano"],["breakfast","desayuno"],["tired","cansado"],["happy","feliz, contento"],["cheap","barato"],["expensive","caro"],["always","siempre"],["usually","normalmente"],["sometimes","a veces"],["weekend","fin de semana"],["kitchen","cocina"],["tall","alto"],["early","temprano"],["weather","clima, tiempo"]],
+flu:["<b>Introduce yourself</b>: name, age and where you live.","<b>Describe your family</b> in 2 or 3 sentences.","Tell me what you <b>eat for breakfast</b>.","Tell me <b>3 things you like</b> and <b>1 thing you don’t like</b>.","Describe your <b>best friend</b>: name, age, and what he or she likes.","What do you <b>do on Saturday</b>? Give 3 sentences.","Describe your <b>bedroom</b>: “There is… There are…”","Tell me <b>3 things you do</b> in the morning.","Ask me <b>3 questions</b>. Any questions!","Describe <b>what you are wearing</b> today."],
+gra:["Complete: “I <b>___</b> (be) a student.”","Complete: “She <b>___</b> (like) pizza.”","Complete: “There <b>___</b> two books on the table.”","Make it <b>negative</b>: “I like coffee.”","Make a <b>question</b>: “You live in Medellín.”","Say the <b>plural</b>: <b>box, child, man</b>.","Complete: “He <b>___</b> (have) a dog.”","Use <b>can</b>: say <b>2 things you can do</b> and <b>1 thing you can’t</b>.","Complete: “We <b>___</b> (go) to school on Monday.”","<b>Fix it</b>: “I am have 20 years.”"],
+wb:[["pedir prestado","borrow"],["prestar","lend"],["mejorar","improve"],["educado","polite"],["grosero","rude"],["nervioso","nervous"],["solo, solitario","lonely"],["raro, extraño","strange"],["decidir","decide"],["invitar","invite"],["consejo","advice (sin plural: “some advice”)"],["viaje","journey, trip"],["equipaje","luggage"],["boleto, entrada","ticket"],["biblioteca","library (“bookstore” = librería)"],["padres","parents (“relatives” = parientes)"],["alfombra","carpet (“folder” = carpeta)"],["gastar","spend"],["notar","notice"],["el uno al otro","each other"]],
+for:["Say your <b>name, age and favorite color</b> <b>3 times fast</b>.","Do <b>5 jumping jacks</b> and <b>count</b> in English.","<b>Point</b> to <b>5 things</b> in the classroom and say what they are.","<b>Mime an animal</b>. The class guesses in English.","<b>Spell</b> your full name in English, letter by letter.","Say the <b>alphabet</b> from <b>A to Z</b>.","<b>Count backwards</b> from <b>20 to 1</b>.","Ask the person next to you <b>3 questions</b> in English."]
+};
+var NAMES={all:"Todas",voc:"Vocabulary",flu:"Fluency",gra:"Grammar",wb:"Word Bomb (A2)"};
+var cur="all",timer=null,lastTr=null,fluSec=30;
+function $(i){return document.getElementById(i)}
+function fmt(s){return s<=10?s.toFixed(1):Math.ceil(s)+""}
+function fill(id,arr,tr){var h="";arr.forEach(function(x){h+=tr?"<li><span><b>"+x[0]+"</b></span><span>"+x[1]+"</span></li>":"<li>"+x+"</li>"});$(id).innerHTML=h}
+fill("L-voc",D.voc);fill("L-tra",D.tra,true);fill("L-flu",D.flu);fill("L-gra",D.gra);fill("L-wb",D.wb,true);fill("L-for",D.for);
+Object.keys(NAMES).forEach(function(k){var b=document.createElement("button");b.className="chip";b.textContent=NAMES[k];b.setAttribute("aria-pressed",k==="all");b.onclick=function(){cur=k;[].forEach.call($("chips").children,function(c){c.setAttribute("aria-pressed",c===b)})};$("chips").appendChild(b)});
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+[].forEach.call($("flu-opt").querySelectorAll("button"),function(b){b.onclick=function(){fluSec=+b.dataset.s;[].forEach.call($("flu-opt").querySelectorAll("button"),function(c){c.setAttribute("aria-pressed",c===b)})}});
+function stop(){clearInterval(timer);timer=null}
+function start(sec){
+ stop();var t0=Date.now(),f=$("fill"),bar=$("bar");bar.className="bar";f.style.transform="scaleX(1)";$("time").textContent=fmt(sec);
+ timer=setInterval(function(){var left=Math.max(0,sec-(Date.now()-t0)/1000);f.style.transform="scaleX("+(left/sec)+")";$("time").textContent=fmt(left);if(left<(sec>10?8:3))bar.className="bar low";if(left<=0){stop();$("time").textContent="TIME’S UP!";}},50);
+}
+$("spin").onclick=function(){
+ var k=cur==="all"?pick(["voc","voc","flu","gra","wb"]):cur,sec,isTr=false;$("ans").textContent="";lastTr=null;
+ if(k==="wb"){isTr=true;lastTr=pick(D.wb);$("cat").textContent="Word Bomb · A2";$("prompt").innerHTML="Say in English: <b>"+lastTr[0]+"</b>";sec=7}
+ else if(k==="voc"&&Math.random()<0.5){isTr=true;lastTr=pick(D.tra);$("cat").textContent="Vocabulary · en español";$("prompt").innerHTML="Say in Spanish: <b>"+lastTr[0]+"</b>";sec=7}
+ else if(k==="voc"){$("cat").textContent="Vocabulary";$("prompt").innerHTML=pick(D.voc);sec=10}
+ else if(k==="flu"){$("cat").textContent="Fluency";$("prompt").innerHTML=pick(D.flu);sec=fluSec}
+ else{$("cat").textContent="Grammar";$("prompt").innerHTML=pick(D.gra);sec=12}
+ $("reveal").disabled=!isTr;start(sec);
+};
+$("reveal").onclick=function(){if(lastTr)$("ans").textContent="✔ "+lastTr[1]};
+$("dead").onclick=function(){stop();$("cat").textContent="Oops! Forfeit:";$("prompt").innerHTML=pick(D.for);$("time").textContent="";$("ans").textContent="";$("reveal").disabled=true;$("fill").style.transform="scaleX(0)"};
+</script>
+</body>
+</html>
